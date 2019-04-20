@@ -3,19 +3,44 @@ var input = require('fs').readFileSync(path.resolve('03. Permutation/05.10971.tx
 // var input = require('fs').readFileSync('/dev/stdin').toString().trim().split('\n');
 
 var n = +input[0];
-var a = input[1].split(' ');
-var p = [], ix;
-var result = 0;
+var map = [], p = [];
+var ix, jx, row, result = 0, pay = 0, chk;
 
 for (ix = 0; ix < n; ix++) {
-    p.push(+a[ix]);
+    p.push(ix + 1);
 }
-p = p.sort(function(a, b) { return a - b; });
 
+for (ix = 1; ix < input.length; ix++) {
+    row = input[ix].split(' ');
+    for (jx = 0; jx < row.length; jx++) {
+        if (!map[ix]) {
+            map[ix - 1] = [];
+        }
 
+        map[ix - 1][jx] = +row[jx];
+    }
+}
 
 do {
-    result = Math.max(calculateDiff(p, n), result);
+    if (p[0] !== 1) {
+        break;
+    }
+
+    chk = true;
+
+    for (ix = 0; ix < n - 1; ix++) {
+        if (!map[p[ix]][p[ix + 1]]) {
+            chk = false;
+        } else {
+            pay += map[p[ix]][p[ix + 1]];
+        }
+    }
+
+    if (chk && map[p[n - 1]][p[0]]) {
+        pay += map[p[n - 1]][p[0]];
+
+        result = Math.max(pay, result);
+    }
 } while(nextPermutation(p, n));
 
 console.log(result);
