@@ -46,7 +46,7 @@ for (ix = 0; ix < k; ix++) {
             graph[v1].push(v2);
         }
 
-        if (graph[v]) {
+        if (graph[v2]) {
             graph[v2].push(v1);
         }
     }
