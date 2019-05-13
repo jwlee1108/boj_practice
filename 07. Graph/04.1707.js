@@ -3,28 +3,46 @@ var path = require('path');
 var input = require('fs').readFileSync(path.resolve('07. Graph/04.1707.txt'), 'utf8').toString().trim().split('\n');
 // var input = require('fs').readFileSync('/dev/stdin').toString().trim().split('\n');
 
-function dfs(v, c) {
-    var ix, next;
+function bfs() {
+    var ix, jx,
+        next, c, n;
 
-    check[v] = c;
+    for (ix = 1; ix <= v; ix++) {
+        if (!check[ix]) {
+            queue.push(ix);
+            c = 1;
+            check[ix] = c;
 
-    for (ix = 0; ix < graph[v].length; ix++) {
-        next = graph[v][ix];
-        if (!check[next]) {
-            if(!dfs(next, 3 - c)) {
-                return false;
+            while (queue.length) {
+                n = queue.shift();
+                c = 3 - check[n];
+
+                if (graph[n]) {
+                    for (jx = 0; jx < graph[n].length; jx++) {
+                        next = graph[n][jx];
+
+                        if (check[n] === check[next]) {
+                            return false;
+                        }
+
+                        if (!check[next]) {
+                            queue.push(next);
+                            check[next] = c;
+                        }
+                    }
+                }
+
             }
-        } else if (check[next] === check[v]) {
-            return false;
         }
     }
+
     return true;
 }
 
 var k = +input[0].trim();
 var ix, jx,
     info, v, e, tc = 1, graph = [], edge;
-var isIntegrated, check = [], v1, v2;
+var check = [], v1, v2, queue = [];
 
 for (ix = 0; ix < k; ix++) {
     info = input[tc].trim().split(' ');
@@ -52,16 +70,8 @@ for (ix = 0; ix < k; ix++) {
     }
 
     check.length = 0;
-    isIntegrated = true;
-
-    for (jx = 1; jx <= v; jx++) {
-        if (!check[jx]) {
-            if(!dfs(jx, 1)) {
-                isIntegrated = false;
-            }
-        }
-    }
+    queue.length = 0;
 
     tc += e + 1;
-    console.log(isIntegrated ? 'YES' : 'NO');
+    console.log(bfs() ? 'YES' : 'NO');
 }
