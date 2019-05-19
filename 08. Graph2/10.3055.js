@@ -35,13 +35,15 @@ function makeMap() {
 
     for (ix = 0; ix < h; ix++) {
         map[ix] = [];
-        mark[ix] = [];
+        water[ix] = [];
+        move[ix] = [];
 
         data = input[ix + 1].trim().split('');
 
         for (jx = 0; jx < w; jx++) {
             map[ix][jx] = data[jx];
-            mark[ix][jx] = -1;
+            water[ix][jx] = 0;
+            move[ix][jx] = 0;
 
             if (data[jx] === 'S') {
                 sp = [ix, jx];
@@ -50,18 +52,9 @@ function makeMap() {
             if (data[jx] === 'D') {
                 dp = [ix, jx];
             }
-        }
-    }
-}
 
-function checkWater() {
-    var ix, jx;
-
-    for (ix = 0; ix < h; ix++) {
-        for (jx = 0; jx < w; jx++) {
-            if (map[ix][jx] === '*') {
+            if (data[jx] === '*') {
                 queue.enqueue([ix, jx]);
-                mark[ix][jx] = 0;
             }
         }
     }
@@ -78,10 +71,9 @@ function waterBFS() {
             ny = v[1] + dy[kx];
 
             if (0 <= nx && nx < h && 0 <= ny && ny < w) {
-
-                if ((map[nx][ny] === '.' || map[nx][ny] === 'S') && mark[nx][ny] === -1) {
+                if (map[nx][ny] === '.' && !water[nx][ny]) {
                     queue.enqueue([nx, ny]);
-                    mark[nx][ny] = mark[v[0]][v[1]] + 1;
+                    water[nx][ny] = water[v[0]][v[1]] + 1;
                 }
             }
         }
@@ -92,7 +84,6 @@ function sonicBFS() {
     var v, kx, nx, ny;
 
     queue.enqueue([sp[0], sp[1]]);
-    map[sp[0]][sp[1]] = 0;
 
     while (queue.getLength()) {
         v = queue.dequeue();
@@ -102,23 +93,21 @@ function sonicBFS() {
             ny = v[1] + dy[kx];
 
             if (0 <= nx && nx < h && 0 <= ny && ny < w) {
-                if (mark[nx][ny] === -1 || map[v[0]][v[1]] + 1 < mark[nx][ny]) {
-                    map[nx][ny] = map[v[0]][v[1]] + 1;
-                    queue.enqueue([nx, ny]);
-                }
-
-                if (nx === dp[0] && ny === dp[1]) {
-                    return map[v[0]][v[1]] + 1;
+                if (!move[nx][ny] && (map[nx][ny] === '.' || map[nx][ny] === 'D')) {
+                    if (!water[nx][ny] || (water[nx][ny] > move[v[0]][v[1]] + 1)) {
+                        move[nx][ny] = move[v[0]][v[1]] + 1;
+                        queue.enqueue([nx, ny]);
+                    }
                 }
             }
         }
     }
 
-    return 'KAKTUS';
+    return move[dp[0]][dp[1]] ? move[dp[0]][dp[1]] : 'KAKTUS';
 }
 
 var info, w, h, sp, dp;
-var map = [], mark = [], queue = new Queue(),
+var map = [], water = [], move = [], queue = new Queue(),
     dx = [1, -1, 0, 0], dy = [0, 0, 1, -1];
 
 info = input[0].split(' ');
@@ -126,6 +115,5 @@ h = +info[0];
 w = +info[1];
 
 makeMap();
-checkWater();
 waterBFS();
 console.log(sonicBFS());
